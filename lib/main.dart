@@ -216,6 +216,17 @@ class _ChatScreenState extends State<ChatScreen> {
         title: const Text("Chat Boot App"),
         // more action for set api key and proxy
         actions: [
+          // clear chat history button
+          IconButton(
+            tooltip: 'Clear Chat History',
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              setState(() {
+                _messages.clear();
+                ChatHistoryHelper.clearChatHistory();
+              });
+            },
+          ),
           IconButton(
             tooltip: 'Configure Api Key',
             icon: const Icon(Icons.key),
