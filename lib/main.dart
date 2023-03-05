@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:chat_boot_app/chat_history_helper.dart';
 import 'package:chat_boot_app/http_tool.dart';
@@ -14,7 +13,7 @@ import 'model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PrefsHelper.init();
-  runApp(ChatApp());
+  runApp(const ChatApp());
 }
 
 class ChatApp extends StatelessWidget {
@@ -22,17 +21,20 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Chat Boot App',
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       // Insert this line
       supportedLocales: [Locale("zh", "CN"), Locale("en", "US")],
-      home: ChatScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const ChatScreen(),
     );
   }
 }
@@ -45,7 +47,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _textController = TextEditingController();
+  late final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = <ChatMessage>[];
 
   @override
@@ -58,6 +60,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
 
   void _sendQuestion(String text) async {
+    if (text.trim().isEmpty) return;
     _textController.clear();
     setState(() {
       _messages.insert(0, ChatMessage(author: 'User', content: text, timeStamp: DateTime.now()));
@@ -68,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _messages.insert(0, response);
     });
     ChatHistoryHelper.saveChatHistory(_messages);
-    if (response.error != null && HttpTool.apiKey.isEmpty) {
+    if (response.error.isEmpty && HttpTool.apiKey.isEmpty) {
       // show snackbar to let the user know that the chatbot is not configured
       _showNotConfiguredApiSnackBar();
     }
@@ -113,6 +116,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 onSubmitted: _sendQuestion,
                 decoration:
                     const InputDecoration.collapsed(hintText: "Send a message"),
+                // max lines should be 5
+                // maxLines: 5,
+                // minLines: 1,
+                // ctrl + enter should send the message, enter should add a new line
+                textInputAction: TextInputAction.newline,
+              
               ),
             ),
             Container(
@@ -187,6 +196,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   // convert the timestamp to a human readable format. e.g. 2 minutes ago
+  /// Returns a string representation of the date and time
+  /// formatted as "Just now", "minutes ago", "hours ago",
+  /// or "days ago".
   String _formatTimestamp(DateTime timestamp) {
     var now = DateTime.now();
     var difference = now.difference(timestamp);

@@ -40,10 +40,10 @@ class HttpTool {
   }
 
   static void _internalSettingProxy(Dio dio) {
-    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+    (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.findProxy = (url) {
-        print('_internalSettingProxy findProxy $httpProxy, url: $url');
+        dog.d('_internalSettingProxy findProxy $httpProxy, url: $url');
         if (httpProxy.isNotEmpty) {
           ///设置代理 电脑ip地址
           return "PROXY $httpProxy";
@@ -109,6 +109,7 @@ class HttpTool {
             'statusCode': e.response?.statusCode,
             'statusMessage': e.response?.statusMessage,
             'data': e.response?.data,
+            'error': e.toString(),
           }),
         );
       } else {
